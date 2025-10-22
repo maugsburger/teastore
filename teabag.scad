@@ -19,29 +19,29 @@ Nr_Bags = 20;
 // Teabag Width
 Bag_Width = 66;
 // Teabag Length
-Bag_Length = 78;
+Bag_Length = 77;
 // Teabag Heigth
-Bag_Height = 5.5;
+Bag_Height = 7;
 // Wiggleroom per Side
-Bag_Wiggle = 1;
+Bag_Wiggle = 0.5;
 
 /* [Opening] */
 // Full Width Opening Size in Teabags
 Opening_Pullout = 1.2;
 // Total Opening Height in Teabags
-Opening_Height_Teabags = 4;
-// Absolute Height Size, used when not null
+Opening_Height_Teabags = 3;
+// Opening Height in mm (used if not null)
 Opening_Height_Absolute = 0;
 // Chamfer radius inside opening
-Opening_Chamfer = 2;
+Opening_Chamfer = 5;
 
 /* [Labelholder] */
 // Inner Width for the Label
-Label_Width = 66;
+Label_Width = 68;
 // Inner Height for the Label
-Label_Height = 75;
+Label_Height = 123;
 // Inner Thickness for the Label
-Label_Thickness = 4;
+Label_Thickness = 1;
 // Inner lip over the label
 Label_Lip = 3;
 // Wall thickness for the Holder
@@ -61,13 +61,13 @@ Dovetail_Back = true;
 
 /* [Screw Mounting Plate] */
 // Screw Head Diameter
-ScrewHead_Diameter = 8;
+ScrewHead_Diameter = 9;
 // Screw Head complete Height
-ScrewHead_Height = 4;
+ScrewHead_Height = 3.5;
 // Angle of the screw heads countersinking part
-ScrewHead_Angle  = 90;
+ScrewHead_Angle  = 180;
 // Thread size, defining the hole diameter
-ScrewThread = 3; // [ 0:M1.6, 1:M2, 2:M2.5, 3:M3, 4:M3.5, 5:M4, 6:M5 ]
+ScrewThread = 5; // [ 0:M1.6, 1:M2, 2:M2.5, 3:M3, 4:M3.5, 5:M4, 6:M5 ]
 // Extra Height of the Mounting Plate with Screwholes
 ScrewPlateExtra = Dovetail_Size;
 
@@ -323,11 +323,11 @@ module dovetail(height, depth, extra=0, fillet=0, angle=false, offset=0 ) {
 
 
 module lid() {
-dovetailplate();
+    dovetailplate();
 }
 
 module mountingplate() {
-dovetailplate(screw=true, extrathick=ScrewPlateExtra);
+    dovetailplate(screw=true, extrathick=ScrewPlateExtra);
 }
 
 module dovetailplate(screw=false, extrathick=0) {
@@ -524,7 +524,7 @@ if ($preview && previewDebug ) {
 } else {
     // can't use module here when we want seperate objects / lazy union
     print_shell_assembled();
-    print_topcover(); 
+    print_topcover();
     print_backplate();
 }
 
