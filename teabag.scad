@@ -267,10 +267,11 @@ module shell_dovetail(extra=0, inner=false, angled=false, offset=0, upperextra=0
 // angle: angle bottom end
 // offset: increase outer size for clearance
 module dovetail(height, depth, extra=0, fillet=0, angle=false, offset=0 ) {
+    length = depth + ( angle==true ? height : 0 );
     difference() {
-        translate([eps,depth+eps,0])
+        translate([eps,length+eps,0])
         rotate([90,0,0])
-        linear_extrude(h=depth-eps) 
+        linear_extrude(h=length-eps) 
 
         // dovetail and chamfer part
         offset(delta=offset)
@@ -293,12 +294,12 @@ module dovetail(height, depth, extra=0, fillet=0, angle=false, offset=0 ) {
             ]);
         }
     
-        // rounding at bottom for vertical dovetail
+        // rounding and chamfer at bottom for vertical dovetail
         if (angle) {
             color("orange")
             translate([0,0,-height/2])
             linear_extrude(h=2*height)
-            translate([0,depth-height+eps,0])
+            translate([0,length-height+eps,0])
             offset(r=-1) offset(delta=+1)
             polygon([
                 [0-extra,height+eps],
@@ -306,6 +307,15 @@ module dovetail(height, depth, extra=0, fillet=0, angle=false, offset=0 ) {
                 [height-fillet-.1,-2],
                 [height*2+eps,-2],
                 
+            ]);
+            translate([-height,length-height+eps,height+eps])
+            rotate([0,90,0])
+            linear_extrude(h=2*height)
+            color("green")
+            polygon([
+                [0,height+eps],
+                [height+eps,height+eps],
+                [0,0],
             ]);
         }
     }
@@ -501,6 +511,7 @@ if ($preview) {
         
     translate([sh_outer_x*2+20,0,0])
         color("purple") dovetailplate();
+        
 } else {
     // can't use module here when we want seperate objects / lazy union
     print_shell_assembled();
