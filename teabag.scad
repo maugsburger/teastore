@@ -150,11 +150,13 @@ module shell_bottom() {
     chamfer = 1;
     radius=12;
 
+    prism_offset = Bag_Ramp / sh_outer_y * Shell_Thickness;
+
         difference() {
 
         union() {
             cube([sh_outer_x, sh_outer_y, Shell_Thickness+eps]);
-            translate([0,0,Shell_Thickness])
+            translate([0,0,prism_offset])
             prism(sh_outer_x, sh_outer_y, Bag_Ramp);
         };
 
