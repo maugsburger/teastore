@@ -6,7 +6,7 @@ include <openscad-screw-holes/screw_holes.scad> // https://github.com/nomike/ope
 Shell_Thickness = 1.5; // 0.25
 
 // Lay all parts flat onto bed
-Printmode = false;
+Print_Flat = false;
 
 // Top Cover Type
 Top_Cover="M"; // [N:None, L:Lid, M:MountingPlate ]
@@ -460,9 +460,12 @@ module print_shell_assembled() {
 }
 
 module print_topcover() {
-    translate_topcover = Printmode==false? [0,0,sh_outer_z] : [sh_outer_x+2,0,0];
-    rotate_mountingplate_print = Printmode==false ? [0,0,0] : [0,180,0];
-    translate_mountingplate_print = Printmode==false ? [0,0,0] : [sh_outer_x,0,Dovetail_Size*2];
+    translate_topcover = 
+        Print_Flat==false? [0,0,sh_outer_z] : [sh_outer_x+2,0,0];
+    rotate_mountingplate_print = 
+        Print_Flat==false ? [0,0,0] : [0,180,0];
+    translate_mountingplate_print = 
+        Print_Flat==false ? [0,0,0] : [sh_outer_x,0,Dovetail_Size*2];
     
     translate(translate_topcover) {
         color("darkred")
@@ -477,9 +480,12 @@ module print_topcover() {
 }
 
 module print_backplate() {
-    translate_backplate = Printmode==false ? [0,sh_outer_y,sh_outer_z] : [2*(sh_outer_x+2),0,0];
-    rotate_backplate = Printmode==false ? [270,0,0] : [0,0,0];
-    rotate_mountingplate_print = Printmode==false ? [0,0,0] : [0,180,0];
+    translate_backplate = 
+        Print_Flat==false ? [0,sh_outer_y,sh_outer_z] : [2*(sh_outer_x+2),0,0];
+    rotate_backplate = 
+        Print_Flat==false ? [270,0,0] : [0,0,0];
+    rotate_mountingplate_print = 
+        Print_Flat==false ? [0,0,0] : [0,180,0];
     
      translate(translate_backplate) rotate(rotate_backplate)  {
         color("maroon")
