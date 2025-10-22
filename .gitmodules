@@ -1,0 +1,3 @@
+[submodule "openscad-screw-holes"]
+	path = openscad-screw-holes
+	url = https://github.com/nomike/openscad-screw-holes.git
