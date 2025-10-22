@@ -40,8 +40,8 @@ Opening_Chamfer = 5;
 /* [Labelholder] */
 // Inner Width for the Label
 Label_Width = 68;
-// Inner Height for the Label
-Label_Height = 123;
+// Inner Height for the Label (0 for up to top)
+Label_Height = 0;
 // Inner Thickness for the Label
 Label_Thickness = 1;
 // Inner lip over the label
@@ -377,28 +377,33 @@ module labelholder() {
     sidecube_width = (sh_outer_x - Label_Width ) / 2;
     chamfer_diag = sqrt(2*sidecube_width^2);
     
-    difference(){ union() {
+label_height = Label_Height > 0 ? Label_Height : 
+     sh_outer_z - sho_total_height - Shell_Thickness + Label_Thickness;
+                                        
+    
+    difference(){
+union() {
         %color("orange") translate([-Label_Width/2,total_thickness,0]) 
-        cube([Label_Width, Label_Height, Label_Thickness]);
+        cube([Label_Width, label_height, Label_Thickness]);
         
         translate([0,total_thickness,Label_Thickness])
         linear_extrude(h=Label_Shell)
-        intersection() {
 
+        intersection() {
         translate([-Label_Width/2-eps,0,0]) 
-        square([Label_Width+2*eps, Label_Height]);
+        square([Label_Width+2*eps, label_height]);
         
         offset(r=-2*Label_Lip) offset(delta=+2*Label_Lip)
         offset(r=Label_Lip) offset(delta=-Label_Lip)
         polygon([
             [0,Label_Lip],
             [Label_Width/2-Label_Lip,Label_Lip], 
-            [Label_Width/2-Label_Lip,Label_Height],
-            [Label_Width/2+2*Label_Lip,Label_Height],
+            [Label_Width/2-Label_Lip,label_height],
+            [Label_Width/2+2*Label_Lip,label_height],
             [Label_Width/2+2*Label_Lip,-2*Label_Lip],
             [-Label_Width/2-2*Label_Lip,-2*Label_Lip],
-            [-Label_Width/2-2*Label_Lip,Label_Height],
-            [-Label_Width/2+Label_Lip,Label_Height],
+            [-Label_Width/2-2*Label_Lip,label_height],
+            [-Label_Width/2+Label_Lip,label_height],
             [-Label_Width/2+Label_Lip,Label_Lip], 
         ]);
         }
@@ -406,26 +411,24 @@ module labelholder() {
         
         
         translate([Label_Width/2,total_thickness,0]) 
-        cube([sidecube_width, Label_Height, total_thickness ]);
+        cube([sidecube_width, label_height, total_thickness ]);
         
         translate([-Label_Width/2-sidecube_width,total_thickness,0]) 
-        cube([sidecube_width, Label_Height, total_thickness ]);
+        cube([sidecube_width, label_height, total_thickness ]);
        
         translate([-sh_outer_x/2,0,0]) 
         prism(sh_outer_x, total_thickness, total_thickness);
-        
-    }
+            }
     
-    
-    translate([-sh_outer_x/2-chamfer_diag/5,0,total_thickness-chamfer_diag/2.5 ])
+        translate([-sh_outer_x/2-chamfer_diag/10,0,total_thickness-chamfer_diag/2.5 ])
     rotate([0,45,0])
     translate([-sidecube_width,0,0])
-    cube([sidecube_width, Label_Height+total_thickness, sidecube_width ]);
+    cube([sidecube_width, label_height+total_thickness, sidecube_width ]);
     
-    translate([sh_outer_x/2+chamfer_diag/5,0,total_thickness-chamfer_diag/2.5 ])
+    translate([sh_outer_x/2+chamfer_diag/10,0,total_thickness-chamfer_diag/2.5 ])
     rotate([0,45,0])
     translate([-sidecube_width,0,0])
-    cube([sidecube_width, Label_Height+total_thickness, sidecube_width ]);
+    cube([sidecube_width, label_height+total_thickness, sidecube_width ]);
     }
     
 }
