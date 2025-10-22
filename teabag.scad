@@ -24,6 +24,8 @@ Bag_Length = 77;
 Bag_Height = 7;
 // Wiggleroom per Side
 Bag_Wiggle = 0.5;  // .25
+// Compensation Ramp
+Bag_Ramp = 20;
 
 /* [Opening] */
 // Full Width Opening Size in Teabags
@@ -150,13 +152,18 @@ module shell_bottom() {
     chamfer = 1;
     radius=12;
 
-    linear_extrude(h=Shell_Thickness)
-    difference() {
-    square([sh_outer_x, sh_outer_y]);
-    
-    // lower part / wide opening
-    translate([Shell_Thickness,chamfer,-1])
-    offset(r=chamfer) offset(delta=-chamfer)
+        difference() {
+
+        union() {
+            cube([sh_outer_x, sh_outer_y, Shell_Thickness+eps]);
+            translate([0,0,Shell_Thickness])
+            prism(sh_outer_x, sh_outer_y, Bag_Ramp);
+        };
+
+        translate([Shell_Thickness,chamfer,-1])
+        linear_extrude(h=sh_inner_z) {
+                    // lower part / wide opening
+        offset(r=chamfer) offset(delta=-chamfer)
     polygon([
         [0, -2*chamfer],
         [0, 0],
@@ -167,8 +174,7 @@ module shell_bottom() {
     ]);
     
     // rounding in top
-    translate([Shell_Thickness,chamfer,0])
-    difference() {
+        difference() {
     offset(r=radius) offset(delta=-radius)
     polygon([
         [0, -2*radius],
@@ -183,6 +189,7 @@ module shell_bottom() {
         [sh_inner_x, 0],
         [sh_inner_x, -2*radius-1]
     ]);
+}
     }
     }
 }
