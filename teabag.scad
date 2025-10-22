@@ -353,13 +353,13 @@ module dovetailplate(screw=false, extrathick=0) {
             
         
         if (screw) {
-            translate([sh_inner_x*.75, 20, tolerance_height/1])
+            translate([sh_outer_x-sh_outer_x/4, 20, tolerance_height/1])
                 #screw_hole(screwhead, ScrewThread, 10, ext=tolerance_height);
             
-            translate([sh_inner_x*.25, 20, tolerance_height/1])
+            translate([0+sh_outer_x/4, 20, tolerance_height/1])
                 #screw_hole(screwhead, ScrewThread, 10, ext=tolerance_height);
                 
-            translate([sh_inner_x/2, sh_inner_y-15, tolerance_height/1])
+            translate([sh_outer_x/2, sh_inner_y-15, tolerance_height/1])
                 #screw_hole(screwhead, ScrewThread, 10, ext=tolerance_height);
         }
     }
