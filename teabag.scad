@@ -23,13 +23,13 @@ Bag_Length = 77;
 // Teabag Heigth
 Bag_Height = 7;
 // Wiggleroom per Side
-Bag_Wiggle = 0.5;
+Bag_Wiggle = 0.5;  // .25
 
 /* [Opening] */
 // Full Width Opening Size in Teabags
-Opening_Pullout = 1.2;
+Opening_Pullout = 1.2; // .1
 // Total Opening Height in Teabags
-Opening_Height_Teabags = 3;
+Opening_Height_Teabags = 3; // .1
 // Opening Height in mm (used if not null)
 Opening_Height_Absolute = 0;
 // Chamfer radius inside opening
@@ -51,9 +51,9 @@ Label_Shell = 1;
 // Height+Width of the Dovetail
 Dovetail_Size = 3;
 // Dovetail Corner Fillet
-Dovetail_Fillet = 0.25;
+Dovetail_Fillet = 0.25; // 0.05
 // Clearance, Substracted in Lid/Mounting Plate
-Dovetail_Clearance = 0.15;
+Dovetail_Clearance = 0.15; // 0.05
 // Create Dovetail on Top?
 Dovetail_Top = true;
 // Create Dovetail on the Back?
@@ -61,9 +61,9 @@ Dovetail_Back = true;
 
 /* [Screw Mounting Plate] */
 // Screw Head Diameter
-ScrewHead_Diameter = 9;
+ScrewHead_Diameter = 9; // 0.1
 // Screw Head complete Height
-ScrewHead_Height = 3.5;
+ScrewHead_Height = 3.5; // 0.1
 // Angle of the screw heads countersinking part
 ScrewHead_Angle  = 180;
 // Thread size, defining the hole diameter
