@@ -91,10 +91,8 @@ sh_outer_y = sh_inner_y + 2* Shell_Thickness;
 sh_outer_z = sh_inner_z + Shell_Thickness; // bottom layer with opening
 
 // Shell pullout
-sho_total_height = Opening_Height_Teabags * Bag_Height;
-if ( Opening_Height_Absolute > 0 ) {
-    sho_total_height = Opening_Height_Absolute;
-}
+sho_total_height =  Opening_Height_Absolute > 0  ?  Opening_Height_Absolute :  Opening_Height_Teabags * Bag_Height;
+
 // Pullout part opening height 
 sho_fullwidth_height = Opening_Pullout * Bag_Height;
 // Offset for diagonal part above pullout part
