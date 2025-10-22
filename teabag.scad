@@ -498,7 +498,9 @@ module print_backplate() {
     }
 }
 
-if ($preview) {
+previewDebug = false;
+
+if ($preview && previewDebug ) {
     difference() {
         group() {
             print_shell_assembled();
@@ -509,32 +511,20 @@ if ($preview) {
         cube([sh_inner_x,2*sh_outer_y, 2*sh_outer_z],center=true);
     };
 
-    translate([sh_outer_x+10,0,0])
-        color("pink") dovetailplate(screw=true, extrathick=ScrewPlateExtra);
+    translate([-(sh_outer_x+10),0,0]) color("pink") 
+        mountingplate();
 
-    translate( [sh_outer_x*2+10 ,sh_outer_y+10,Dovetail_Size*2]) rotate([0,180,0])
-        color("pink") dovetailplate(screw=true, extrathick=ScrewPlateExtra);
+    translate( [-10 ,sh_outer_y+10,Dovetail_Size*2]) 
+        rotate([0,180,0]) color("pink")
+        mountingplate();
         
-    translate([sh_outer_x*2+20,0,0])
-        color("purple") dovetailplate();
+    translate([-(sh_outer_x*2+20),0,0])
+        color("purple") lid();
         
 } else {
     // can't use module here when we want seperate objects / lazy union
     print_shell_assembled();
-    print_topcover() 
+    print_topcover(); 
     print_backplate();
 }
-
-//shell_top_dovetail();
-/*
-color("blue")//, 0.2) 
-difference() {
-shell_assembled();
-translate([-Shell_Thickness/2, -Shell_Thickness/2, 1.5])
-cube([sh_outer_x+Shell_Thickness, sh_outer_y+Shell_Thickness, sh_outer_z+Shell_Thickness]);
-}
-*/
-//linear_extrude(height = 2*Shell_Thickness)
-
-
 
