@@ -42,7 +42,7 @@ Opening_Chamfer = 5;
 Label_Width = 0;
 // Inner Height for the Label (0 for up to top)
 Label_Height = 67;
-// Inner Thickness for the Label
+// Inner Thickness for the Label (0 for no labelholder)
 Label_Thickness = 1;
 // Lip over the label
 Label_Lip = 2.5; // .5
@@ -495,9 +495,11 @@ module shell_assembled() {
         // back is always longer, so it matches top no matter what
         shell_dovetail(extra=Dovetail_Size, angled=true);
     }
+if (Label_Thickness > 0 ) {
     translate([sh_outer_x/2,0,sho_total_height+Shell_Thickness])
     rotate([90,0,0])
     labelholder();
+}
 }
 
 module print_shell_assembled() {
