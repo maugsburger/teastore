@@ -200,10 +200,11 @@ module shell_bottom() {
 // create top part with dovetails. parameters:
 // extra: increase dovetail length
 // inner: create inner dovetails to sit on, below surface
-// angled: rounded back corner for vertical dovetail
+// angled: rounded back corner (used for vertical dovetail)
 // offset: increase base size by offset for tolerances
 // upperextra: increase the dovetail and cube on top outwards with a rectangle this wide
-module shell_dovetail(extra=0, inner=false, angled=false, offset=0, upperextra=0) {
+// notch: add positive notch (1) or bigger to use as negative feature (-1)
+module shell_dovetail(extra=0, inner=false, angled=false, offset=0, upperextra=0, notch = 0) {
     
     // angled piece on front
     //translate([-upperextra,0,-eps])
@@ -241,18 +242,12 @@ module shell_dovetail(extra=0, inner=false, angled=false, offset=0, upperextra=0
     
     translate([0,eps,eps]){
         // upper dovetails
-        translate([dovetail_base,0,0])
-        dovetail(
-            height=dovetail_height, depth=dovetail_len+extra,
-            extra=dovetail_base+upperextra, fillet=Dovetail_Fillet, 
-            angle=angled, offset=offset);
+        translate([dovetail_base,0,0]) 
+            dovetail_top(dovetail_base, dovetail_len, dovetail_height, extra, upperextra, offset, angled, notch);
         
         translate([sh_outer_x-dovetail_base,0,0])
         mirror([1,0,0])
-        dovetail(
-            height=dovetail_height, depth=dovetail_len+extra, 
-            extra=dovetail_base+upperextra, fillet=Dovetail_Fillet, 
-            angle=angled, offset=offset);
+            dovetail_top(dovetail_base, dovetail_len, dovetail_height, extra, upperextra, offset, angled, notch);
         
         if (inner) {
         // lower holding dovetails
@@ -262,11 +257,43 @@ module shell_dovetail(extra=0, inner=false, angled=false, offset=0, upperextra=0
             extra=eps);
         
         translate([sh_outer_x-Shell_Thickness,-eps,-Dovetail_Size])
-        mirror([1,0,0])
-        dovetail(
-            height=Dovetail_Size, depth=dovetail_len, 
-            extra=eps);
+        mirror([1,0,0]) {
+            dovetail(
+                height=Dovetail_Size, depth=dovetail_len, 
+                extra=eps); 
+        };
         }
+    }
+
+    
+}
+
+module dovetail_top(dovetail_base, dovetail_len, dovetail_height, extra, upperextra, offset, angled, notch) {
+    front_chamfer_size = min(Shell_Thickness, Dovetail_Size);
+    // notch feature location
+    notch_size = [1.5, 5, 1 ];
+    notch_size_offset =  notch_size + [offset, offset, offset ];
+
+    notch_position_start = [Dovetail_Fillet , 2 * front_chamfer_size , 0]; 
+    notch_position = notch_position_start + [0, notch_size[1] - 2* Dovetail_Clearance, 0];
+    
+
+    dovetail(
+        height=dovetail_height, depth=dovetail_len+extra,
+        extra=dovetail_base+upperextra, fillet=Dovetail_Fillet, 
+        angle=angled, offset=offset);
+
+    if ( notch != 0 ) {
+        translate(v = notch_position)
+        scale(v = notch_size_offset) 
+        cylinder(h = 1, r = .5, $fn=90);
+        //sphere(r = .5);
+    }
+
+    if ( notch == -1 ) {
+        translate(v = notch_position_start)
+        scale(v = notch_size_offset) 
+        cylinder(h = 1, r = .5, $fn=90); //sphere(r = .5);
     }
 }
 
@@ -360,7 +387,7 @@ module dovetailplate(screw=false, extrathick=0) {
         // different length depending on enabled back-holder 
         // TODO make global calculation
         shell_dovetail(extra=lid_extra, offset=Dovetail_Clearance,
-            upperextra=Shell_Thickness*2);
+            upperextra=Shell_Thickness*2, notch = -1);
             
         
         if (screw) {
@@ -457,9 +484,9 @@ module shell_assembled() {
     if (Dovetail_Top) {
         translate([0,0,sh_outer_z])
         if (Dovetail_Back) {
-            shell_dovetail(extra=Dovetail_Size, true);
+            shell_dovetail(extra=Dovetail_Size, true, notch = 1);
         } else {
-            shell_dovetail(0, true);
+            shell_dovetail(0, true, notch = 1);
         }
     }
     if (Dovetail_Back) {
@@ -526,7 +553,8 @@ if ($preview && previewDebug ) {
             print_topcover();
             print_backplate();
         }
-        translate([0,sh_inner_y/2,sh_inner_z/2])
+        //translate([0,sh_inner_y/2,sh_inner_z/2])
+        translate([sh_inner_x/2-.5,sh_inner_y/2,sh_inner_z/2])
         cube([sh_inner_x,2*sh_outer_y, 2*sh_outer_z],center=true);
     };
 
