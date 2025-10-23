@@ -29,7 +29,9 @@ Bag_Ramp = 20;
 
 /* [Opening] */
 // Full Width Opening Size in Teabags
-Opening_Pullout = 1.2; // .1
+Opening_Pullout = 1.0; // .1
+// Reduce Full Width 
+Opening_Friction = 1.0; // .1
 // Total Opening Height in Teabags
 Opening_Height_Teabags = 3; // .1
 // Opening Height in mm (used if not null)
@@ -132,6 +134,9 @@ module shell_base() {
 
 // Pullout opening for basic shell
 module shell_opening() {
+opening_width = sh_inner_x-Opening_Friction;
+
+    translate(v = [Opening_Friction/2,0,0]) 
     offset(r=Opening_Chamfer)  offset(delta=-Opening_Chamfer)
     //offset(delta=2, chamfer=true) 
     polygon([
@@ -140,11 +145,11 @@ module shell_opening() {
         [0,sho_fullwidth_height],
         [sho_diagonal_height,
             sho_fullwidth_height + sho_diagonal_height],
-        [sh_inner_x-sho_diagonal_height,
+        [opening_width-sho_diagonal_height,
             sho_fullwidth_height + sho_diagonal_height],
-        [sh_inner_x,sho_fullwidth_height],
-        [sh_inner_x,0],
-        [sh_inner_x,-Opening_Chamfer-Shell_Thickness]
+        [opening_width,sho_fullwidth_height],
+        [opening_width,0],
+        [opening_width,-Opening_Chamfer-Shell_Thickness]
     ]);
     
 }
@@ -154,6 +159,7 @@ module shell_bottom() {
     radius=12;
 
     prism_offset = Bag_Ramp / sh_outer_y * Shell_Thickness;
+opening_width = sh_inner_x-Opening_Friction;
 
     difference() {
 
@@ -163,17 +169,17 @@ module shell_bottom() {
             prism(sh_outer_x, sh_outer_y, Bag_Ramp);
         };
 
-        translate([Shell_Thickness,chamfer,-1])
+        translate([Shell_Thickness+Opening_Friction/2,chamfer,-1])
         linear_extrude(h=sh_inner_z) {
             // lower part / wide opening
             offset(r=chamfer) offset(delta=-chamfer)
             polygon([
                 [0, -2*chamfer],
                 [0, 0],
-                [sh_inner_x/2-radius, sh_inner_x/2-radius],
-                [sh_inner_x/2+radius, sh_inner_x/2-radius],
-                [sh_inner_x, 0],
-                [sh_inner_x, -2*chamfer]
+                [opening_width/2-radius, opening_width/2-radius],
+                [opening_width/2+radius, opening_width/2-radius],
+                [opening_width, 0],
+                [opening_width, -2*chamfer]
             ]);
             
             // rounding in top
@@ -182,15 +188,15 @@ module shell_bottom() {
             polygon([
                 [0, -2*radius],
                 [0, 0],
-                [sh_inner_x/2, sh_inner_x/2],
-                [sh_inner_x, 0],
-                [sh_inner_x, -2*radius]
+                [opening_width/2, opening_width/2],
+                [opening_width, 0],
+                [opening_width, -2*radius]
             ]);
             polygon([
                 [0, -2*radius-1],
                 [0, 0],
-                [sh_inner_x, 0],
-                [sh_inner_x, -2*radius-1]
+                [opening_width, 0],
+                [opening_width, -2*radius-1]
             ]);
             }
         }
