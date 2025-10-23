@@ -14,8 +14,8 @@ Top_Cover="M"; // [N:None, L:Lid, M:MountingPlate ]
 Back_Plate="L"; // [N:None, L:Lid, M:MountingPlate ]
 
 /* [Teabags] */
-// Number of Teabags
-Nr_Bags = 20;
+// Number of Teabags (<50) or absolute inner Height
+Bag_Space = 120;
 // Teabag Width
 Bag_Width = 66;
 // Teabag Length
@@ -85,7 +85,7 @@ screwhead = [ScrewHead_Diameter, ScrewHead_Height, ScrewHead_Angle];
 // shell overall
 sh_inner_x = Bag_Width + 2* Bag_Wiggle;
 sh_inner_y = Bag_Length + 2* Bag_Wiggle;
-sh_inner_z = Bag_Height * Nr_Bags;
+sh_inner_z = Bag_Space < 50 ? Bag_Height * Bag_Space : Bag_Space;
 sh_outer_x = sh_inner_x + 2* Shell_Thickness;
 sh_outer_y = sh_inner_y + 2* Shell_Thickness; 
 sh_outer_z = sh_inner_z + Shell_Thickness; // bottom layer with opening
