@@ -155,7 +155,7 @@ module shell_bottom() {
 
     prism_offset = Bag_Ramp / sh_outer_y * Shell_Thickness;
 
-        difference() {
+    difference() {
 
         union() {
             cube([sh_outer_x, sh_outer_y, Shell_Thickness+eps]);
@@ -165,35 +165,35 @@ module shell_bottom() {
 
         translate([Shell_Thickness,chamfer,-1])
         linear_extrude(h=sh_inner_z) {
-                    // lower part / wide opening
-        offset(r=chamfer) offset(delta=-chamfer)
-    polygon([
-        [0, -2*chamfer],
-        [0, 0],
-        [sh_inner_x/2-radius, sh_inner_x/2-radius],
-        [sh_inner_x/2+radius, sh_inner_x/2-radius],
-        [sh_inner_x, 0],
-        [sh_inner_x, -2*chamfer]
-    ]);
-    
-    // rounding in top
-        difference() {
-    offset(r=radius) offset(delta=-radius)
-    polygon([
-        [0, -2*radius],
-        [0, 0],
-        [sh_inner_x/2, sh_inner_x/2],
-        [sh_inner_x, 0],
-        [sh_inner_x, -2*radius]
-    ]);
-    polygon([
-        [0, -2*radius-1],
-        [0, 0],
-        [sh_inner_x, 0],
-        [sh_inner_x, -2*radius-1]
-    ]);
-}
-    }
+            // lower part / wide opening
+            offset(r=chamfer) offset(delta=-chamfer)
+            polygon([
+                [0, -2*chamfer],
+                [0, 0],
+                [sh_inner_x/2-radius, sh_inner_x/2-radius],
+                [sh_inner_x/2+radius, sh_inner_x/2-radius],
+                [sh_inner_x, 0],
+                [sh_inner_x, -2*chamfer]
+            ]);
+            
+            // rounding in top
+            difference() {
+            offset(r=radius) offset(delta=-radius)
+            polygon([
+                [0, -2*radius],
+                [0, 0],
+                [sh_inner_x/2, sh_inner_x/2],
+                [sh_inner_x, 0],
+                [sh_inner_x, -2*radius]
+            ]);
+            polygon([
+                [0, -2*radius-1],
+                [0, 0],
+                [sh_inner_x, 0],
+                [sh_inner_x, -2*radius-1]
+            ]);
+            }
+        }
     }
 }
 
@@ -346,6 +346,7 @@ module dovetailplate(screw=false, extrathick=0) {
     tolerance_height = 0.1; // z dimension when on top
     lid_extra = Dovetail_Back == true ? Dovetail_Size : 0;
     lid_y = sh_outer_y + lid_extra - tolerance_depth;
+    lid_heigth = Dovetail_Size + extrathick;
         
     difference() { 
         // base cube 
@@ -354,7 +355,7 @@ module dovetailplate(screw=false, extrathick=0) {
             tolerance_height/2])
         cube([sh_outer_x + tolerance_width, 
             lid_y, 
-            Dovetail_Size+extrathick-tolerance_height]);
+            lid_heigth-tolerance_height]);
 
         // different length depending on enabled back-holder 
         // TODO make global calculation
@@ -363,14 +364,14 @@ module dovetailplate(screw=false, extrathick=0) {
             
         
         if (screw) {
-            translate([sh_outer_x-sh_outer_x/4, 20, tolerance_height/1])
-                #screw_hole(screwhead, ScrewThread, 10, ext=tolerance_height);
+            translate([sh_outer_x-sh_outer_x/4, 20, 0])
+                #screw_hole(screwhead, ScrewThread, lid_heigth, 0);
             
-            translate([0+sh_outer_x/4, 20, tolerance_height/1])
-                #screw_hole(screwhead, ScrewThread, 10, ext=tolerance_height);
+            translate([0+sh_outer_x/4, 20, 0])
+                #screw_hole(screwhead, ScrewThread, lid_heigth, 0);
                 
-            translate([sh_outer_x/2, sh_inner_y-15, tolerance_height/1])
-                #screw_hole(screwhead, ScrewThread, 10, ext=tolerance_height);
+            translate([sh_outer_x/2, sh_inner_y-15, 0])
+                #screw_hole(screwhead, ScrewThread, lid_heigth, 0);
         }
     }
 }
@@ -378,7 +379,7 @@ module dovetailplate(screw=false, extrathick=0) {
 
 
 module labelholder() {
-label_height = Label_Height > 0 ? Label_Height : 
+    label_height = Label_Height > 0 ? Label_Height : 
         sh_outer_z - sho_total_height - Shell_Thickness + Label_Thickness;
 
     label_width =  Label_Width > 0 ? Label_Width : 
@@ -387,57 +388,57 @@ label_height = Label_Height > 0 ? Label_Height :
     total_thickness = Label_Thickness + Label_Shell;
     sidecube_width = (sh_outer_x - label_width ) / 2;
     chamfer_diag = sqrt(2*sidecube_width^2);
-    
-echo("Label dimensions:", label_width, label_height, Label_Thickness);
+
+    echo("Label dimensions:", label_width, label_height, Label_Thickness);
     
     difference(){
-union() {
-        %color("orange") translate([-label_width/2,total_thickness,0]) 
-        cube([label_width, label_height, Label_Thickness]);
-        
-        translate([0,total_thickness,Label_Thickness])
-        linear_extrude(h=Label_Shell)
-
-        intersection() {
-        translate([-label_width/2-eps,0,0]) 
-        square([label_width+2*eps, label_height]);
-        
-        offset(r=-2*Label_Lip) offset(delta=+2*Label_Lip)
-        offset(r=Label_Lip) offset(delta=-Label_Lip)
-        polygon([
-            [0,Label_Lip],
-            [label_width/2-Label_Lip,Label_Lip], 
-            [label_width/2-Label_Lip,label_height],
-            [label_width/2+2*Label_Lip,label_height],
-            [label_width/2+2*Label_Lip,-2*Label_Lip],
-            [-label_width/2-2*Label_Lip,-2*Label_Lip],
-            [-label_width/2-2*Label_Lip,label_height],
-            [-label_width/2+Label_Lip,label_height],
-            [-label_width/2+Label_Lip,Label_Lip], 
-        ]);
-        }
-        
-        
-        
-        translate([label_width/2,total_thickness,0]) 
-        cube([sidecube_width, label_height, total_thickness ]);
-        
-        translate([-label_width/2-sidecube_width,total_thickness,0]) 
-        cube([sidecube_width, label_height, total_thickness ]);
-       
-        translate([-sh_outer_x/2,0,0]) 
-        prism(sh_outer_x, total_thickness, total_thickness);
+        union() {
+            %color("orange") translate([-label_width/2,total_thickness,0]) 
+            cube([label_width, label_height, Label_Thickness]);
+            
+            translate([0,total_thickness,Label_Thickness])
+                linear_extrude(h=Label_Shell)
+            
+            intersection() {
+                translate([-label_width/2-eps,0,0]) 
+                square([label_width+2*eps, label_height]);
+            
+                offset(r=-2*Label_Lip) offset(delta=+2*Label_Lip)
+                offset(r=Label_Lip) offset(delta=-Label_Lip)
+                polygon([
+                    [0,Label_Lip],
+                    [label_width/2-Label_Lip,Label_Lip], 
+                    [label_width/2-Label_Lip,label_height],
+                    [label_width/2+2*Label_Lip,label_height],
+                    [label_width/2+2*Label_Lip,-2*Label_Lip],
+                    [-label_width/2-2*Label_Lip,-2*Label_Lip],
+                    [-label_width/2-2*Label_Lip,label_height],
+                    [-label_width/2+Label_Lip,label_height],
+                    [-label_width/2+Label_Lip,Label_Lip], 
+                ]);
             }
-    
+            
+            
+            
+            translate([label_width/2,total_thickness,0]) 
+            cube([sidecube_width, label_height, total_thickness ]);
+            
+            translate([-label_width/2-sidecube_width,total_thickness,0]) 
+            cube([sidecube_width, label_height, total_thickness ]);
+        
+            translate([-sh_outer_x/2,0,0]) 
+            prism(sh_outer_x, total_thickness, total_thickness);
+        }
+
         translate([-sh_outer_x/2-chamfer_diag/10,0,total_thickness-chamfer_diag/2.5 ])
-    rotate([0,45,0])
-    translate([-sidecube_width,0,0])
-    cube([sidecube_width, label_height+total_thickness, sidecube_width ]);
-    
-    translate([sh_outer_x/2+chamfer_diag/10,0,total_thickness-chamfer_diag/2.5 ])
-    rotate([0,45,0])
-    translate([-sidecube_width,0,0])
-    cube([sidecube_width, label_height+total_thickness, sidecube_width ]);
+        rotate([0,45,0])
+        translate([-sidecube_width,0,0])
+        cube([sidecube_width, label_height+total_thickness, sidecube_width ]);
+        
+        translate([sh_outer_x/2+chamfer_diag/10,0,total_thickness-chamfer_diag/2.5 ])
+        rotate([0,45,0])
+        translate([-sidecube_width,0,0])
+        cube([sidecube_width, label_height+total_thickness, sidecube_width ]);
     }
     
 }
@@ -515,9 +516,10 @@ module print_backplate() {
     }
 }
 
-previewDebug = false;
+previewDebug = true;
 
 if ($preview && previewDebug ) {
+    translate(v = [sh_outer_x + 10, 0 , 0])
     difference() {
         group() {
             print_shell_assembled();
@@ -537,6 +539,8 @@ if ($preview && previewDebug ) {
         
     translate([-(sh_outer_x*2+20),0,0])
         color("purple") lid();
+
+    mountingplate();
         
 } else {
     // can't use module here when we want seperate objects / lazy union
