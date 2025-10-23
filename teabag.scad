@@ -38,14 +38,14 @@ Opening_Height_Absolute = 0;
 Opening_Chamfer = 5;
 
 /* [Labelholder] */
-// Inner Width for the Label
-Label_Width = 68;
+// Inner Width for the Label (0 for full width)
+Label_Width = 0;
 // Inner Height for the Label (0 for up to top)
-Label_Height = 0;
+Label_Height = 67;
 // Inner Thickness for the Label
 Label_Thickness = 1;
-// Inner lip over the label
-Label_Lip = 3;
+// Lip over the label
+Label_Lip = 2.5; // .5
 // Wall thickness for the Holder
 Label_Shell = 1;
 
@@ -375,47 +375,51 @@ module dovetailplate(screw=false, extrathick=0) {
 
 
 module labelholder() {
+label_height = Label_Height > 0 ? Label_Height : 
+        sh_outer_z - sho_total_height - Shell_Thickness + Label_Thickness;
+
+    label_width =  Label_Width > 0 ? Label_Width : 
+        sh_outer_x - 2* Label_Shell;
+
     total_thickness = Label_Thickness + Label_Shell;
-    sidecube_width = (sh_outer_x - Label_Width ) / 2;
+    sidecube_width = (sh_outer_x - label_width ) / 2;
     chamfer_diag = sqrt(2*sidecube_width^2);
     
-label_height = Label_Height > 0 ? Label_Height : 
-     sh_outer_z - sho_total_height - Shell_Thickness + Label_Thickness;
-                                        
+echo("Label dimensions:", label_width, label_height, Label_Thickness);
     
     difference(){
 union() {
-        %color("orange") translate([-Label_Width/2,total_thickness,0]) 
-        cube([Label_Width, label_height, Label_Thickness]);
+        %color("orange") translate([-label_width/2,total_thickness,0]) 
+        cube([label_width, label_height, Label_Thickness]);
         
         translate([0,total_thickness,Label_Thickness])
         linear_extrude(h=Label_Shell)
 
         intersection() {
-        translate([-Label_Width/2-eps,0,0]) 
-        square([Label_Width+2*eps, label_height]);
+        translate([-label_width/2-eps,0,0]) 
+        square([label_width+2*eps, label_height]);
         
         offset(r=-2*Label_Lip) offset(delta=+2*Label_Lip)
         offset(r=Label_Lip) offset(delta=-Label_Lip)
         polygon([
             [0,Label_Lip],
-            [Label_Width/2-Label_Lip,Label_Lip], 
-            [Label_Width/2-Label_Lip,label_height],
-            [Label_Width/2+2*Label_Lip,label_height],
-            [Label_Width/2+2*Label_Lip,-2*Label_Lip],
-            [-Label_Width/2-2*Label_Lip,-2*Label_Lip],
-            [-Label_Width/2-2*Label_Lip,label_height],
-            [-Label_Width/2+Label_Lip,label_height],
-            [-Label_Width/2+Label_Lip,Label_Lip], 
+            [label_width/2-Label_Lip,Label_Lip], 
+            [label_width/2-Label_Lip,label_height],
+            [label_width/2+2*Label_Lip,label_height],
+            [label_width/2+2*Label_Lip,-2*Label_Lip],
+            [-label_width/2-2*Label_Lip,-2*Label_Lip],
+            [-label_width/2-2*Label_Lip,label_height],
+            [-label_width/2+Label_Lip,label_height],
+            [-label_width/2+Label_Lip,Label_Lip], 
         ]);
         }
         
         
         
-        translate([Label_Width/2,total_thickness,0]) 
+        translate([label_width/2,total_thickness,0]) 
         cube([sidecube_width, label_height, total_thickness ]);
         
-        translate([-Label_Width/2-sidecube_width,total_thickness,0]) 
+        translate([-label_width/2-sidecube_width,total_thickness,0]) 
         cube([sidecube_width, label_height, total_thickness ]);
        
         translate([-sh_outer_x/2,0,0]) 
