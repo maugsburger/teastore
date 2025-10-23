@@ -6,7 +6,7 @@ include <openscad-screw-holes/screw_holes.scad> // https://github.com/nomike/ope
 Shell_Thickness = 1.5; // 0.25
 
 // Lay all parts flat onto bed
-Print_Flat = false;
+Print_Flat = true;
 
 // Top Cover Type
 Top_Cover="M"; // [N:None, L:Lid, M:MountingPlate ]
@@ -21,9 +21,9 @@ Bag_Width = 66;
 // Teabag Length
 Bag_Length = 77;
 // Teabag Heigth
-Bag_Height = 7;
+Bag_Height = 6.5; // .25
 // Wiggleroom per Side
-Bag_Wiggle = 0.5;  // .25
+Bag_Wiggle = 1.0;  // .25
 // Compensation Ramp
 Bag_Ramp = 20;
 
@@ -33,7 +33,7 @@ Opening_Pullout = 1.0; // .1
 // Reduce Full Width 
 Opening_Friction = 1.0; // .1
 // Total Opening Height in Teabags
-Opening_Height_Teabags = 3; // .1
+Opening_Height_Teabags = 2.5; // .1
 // Opening Height in mm (used if not null)
 Opening_Height_Absolute = 0;
 // Chamfer radius inside opening
@@ -43,7 +43,7 @@ Opening_Chamfer = 5;
 // Inner Width for the Label (0 for full width)
 Label_Width = 0;
 // Inner Height for the Label (0 for up to top)
-Label_Height = 67;
+Label_Height = 0;
 // Inner Thickness for the Label (0 for no labelholder)
 Label_Thickness = 1;
 // Lip over the label
@@ -67,7 +67,7 @@ Dovetail_Back = true;
 // Screw Head Diameter
 ScrewHead_Diameter = 9; // 0.1
 // Screw Head complete Height
-ScrewHead_Height = 3.5; // 0.1
+ScrewHead_Height = 3.8; // 0.1
 // Angle of the screw heads countersinking part
 ScrewHead_Angle  = 180;
 // Thread size, defining the hole diameter
@@ -134,7 +134,7 @@ module shell_base() {
 
 // Pullout opening for basic shell
 module shell_opening() {
-opening_width = sh_inner_x-Opening_Friction;
+    opening_width = sh_inner_x-Opening_Friction;
 
     translate(v = [Opening_Friction/2,0,0]) 
     offset(r=Opening_Chamfer)  offset(delta=-Opening_Chamfer)
@@ -159,7 +159,7 @@ module shell_bottom() {
     radius=12;
 
     prism_offset = Bag_Ramp / sh_outer_y * Shell_Thickness;
-opening_width = sh_inner_x-Opening_Friction;
+    opening_width = sh_inner_x-Opening_Friction;
 
     difference() {
 
@@ -481,8 +481,8 @@ module shell_assembled() {
     difference() {
         //color("green", 0.2) 
         shell_base();
-            rotate([90,0,0]) 
-            translate([Shell_Thickness,0,-1.5*Shell_Thickness])
+        rotate([90,0,0]) 
+        translate([Shell_Thickness,0,-1.5*Shell_Thickness])
             linear_extrude(height = 2*Shell_Thickness)
             shell_opening();
     }
@@ -501,11 +501,11 @@ module shell_assembled() {
         // back is always longer, so it matches top no matter what
         shell_dovetail(extra=Dovetail_Size, angled=true);
     }
-if (Label_Thickness > 0 ) {
-    translate([sh_outer_x/2,0,sho_total_height+Shell_Thickness])
-    rotate([90,0,0])
-    labelholder();
-}
+    if (Label_Thickness > 0 ) {
+        translate([sh_outer_x/2,0,sho_total_height+Shell_Thickness])
+        rotate([90,0,0])
+        labelholder();
+    }
 }
 
 module print_shell_assembled() {
@@ -551,7 +551,7 @@ module print_backplate() {
     }
 }
 
-previewDebug = true;
+previewDebug = false;
 
 if ($preview && previewDebug ) {
     translate(v = [sh_outer_x + 10, 0 , 0])
@@ -562,8 +562,8 @@ if ($preview && previewDebug ) {
             print_backplate();
         }
         //translate([0,sh_inner_y/2,sh_inner_z/2])
-        translate([sh_inner_x/2-.5,sh_inner_y/2,sh_inner_z/2])
-        cube([sh_inner_x,2*sh_outer_y, 2*sh_outer_z],center=true);
+        translate([sh_inner_x/2,sh_inner_y/2,2*sh_outer_z+Dovetail_Fillet])
+        cube([sh_outer_x,2*sh_outer_y, 2*sh_outer_z],center=true);
     };
 
     translate([-(sh_outer_x+10),0,0]) color("pink") 
