@@ -13,6 +13,12 @@ Top_Cover="M"; // [N:None, L:Lid, M:MountingPlate ]
 // Back Plate Type
 Back_Plate="L"; // [N:None, L:Lid, M:MountingPlate ]
 
+// Replicate Ramp Angle on Outside to reduce material usage
+Bottom_Angled = true; 
+
+// Compensate for Ramp, keep depth constant.
+Constant_Depth = true;
+
 /* [Teabags] */
 // Number of Teabags (<50) or absolute inner Height
 Bag_Space = 120;
@@ -103,6 +109,9 @@ sho_fullwidth_height = Opening_Pullout * Bag_Height;
 // Offset for diagonal part above pullout part
 sho_diagonal_height = sho_total_height - sho_fullwidth_height;
 
+// ramp
+ramp_angle = atan2(Bag_Ramp, sh_inner_y);
+
 // helper modules 
 module prism(l, w, h) {
     polyhedron(// pt      0        1        2        3        4        5
@@ -158,15 +167,17 @@ module shell_bottom() {
     chamfer = 1;
     radius=12;
 
-    prism_offset = Bag_Ramp / sh_outer_y * Shell_Thickness;
+    ramp_height = sh_outer_y * tan(ramp_angle);
+    prism_z_offset = Shell_Thickness * (1 - tan(ramp_angle));
+
     opening_width = sh_inner_x-Opening_Friction;
 
     difference() {
 
         union() {
             cube([sh_outer_x, sh_outer_y, Shell_Thickness+eps]);
-            translate([0,0,prism_offset])
-            prism(sh_outer_x, sh_outer_y, Bag_Ramp);
+            translate([0,0,prism_z_offset])
+            prism(sh_outer_x, sh_outer_y, ramp_height);
         };
 
         translate([Shell_Thickness+Opening_Friction/2,chamfer,-1])
@@ -201,6 +212,43 @@ module shell_bottom() {
             }
         }
     }
+}
+
+module bottom_cutoff() {
+    // calculate angle of ramp
+
+    // inner surface starts at [ 0, 0, prism_z_offset ]
+    prism_z_offset = Shell_Thickness * (1 - tan(ramp_angle));
+    // z distance to keep angled surfaces at perpendicular distance Shell_Thickness
+    shell_thickness_angled = Shell_Thickness * cos(ramp_angle);
+    // combine them for final z offset
+    z_offset = prism_z_offset - shell_thickness_angled;
+    
+    echo("offset:", prism_z_offset, shell_thickness_angled, z_offset);
+
+    y = sh_outer_y +  Dovetail_Size + eps;
+    z = y * tan(ramp_angle);    
+
+    translate(v = [-1, 0 ,z_offset]) 
+    prism(sh_outer_x + 2, y, z);
+}
+
+module backfill() {
+    // Constant_Depth
+
+    // define dimension
+    px = sh_inner_x + 2*eps;
+    py = (sh_inner_y ) - (Bag_Length * cos(ramp_angle));
+    pz = sh_inner_z - //sh_inner_y * tan(ramp_angle);
+        ( Bag_Length * cos(ramp_angle) + Shell_Thickness ) * tan(ramp_angle) + Shell_Thickness;
+
+    // define starting point
+    ty = Bag_Length * cos(ramp_angle) + Shell_Thickness;
+    tz = Bag_Length * sin(ramp_angle) + Shell_Thickness;
+    
+
+    translate( [Shell_Thickness-eps, ty, tz] ) 
+    prism(px, py, pz);
 }
 
 // create top part with dovetails. parameters:
@@ -477,35 +525,52 @@ module labelholder() {
 }
 
 module shell_assembled() {
-    translate([0,0,Shell_Thickness])
-    difference() {
-        //color("green", 0.2) 
-        shell_base();
-        rotate([90,0,0]) 
-        translate([Shell_Thickness,0,-1.5*Shell_Thickness])
-            linear_extrude(height = 2*Shell_Thickness)
-            shell_opening();
-    }
-    shell_bottom();
-    if (Dovetail_Top) {
-        translate([0,0,sh_outer_z])
-        if (Dovetail_Back) {
-            shell_dovetail(extra=Dovetail_Size, true, notch = 1);
-        } else {
-            shell_dovetail(0, true, notch = 1);
+    difference() { 
+        union() {
+            translate([0,0,Shell_Thickness])
+            difference() {
+                //color("green", 0.2) 
+                shell_base();
+                rotate([90,0,0]) 
+                translate([Shell_Thickness,0,-1.5*Shell_Thickness])
+                    linear_extrude(height = 2*Shell_Thickness)
+                    shell_opening();
+            }
+
+            shell_bottom();
+
+            if (Dovetail_Back) {
+                translate([0,sh_outer_y,sh_outer_z])
+                rotate([270,0,0])
+                // back is always longer, so it matches top no matter what
+                shell_dovetail(extra=Dovetail_Size, angled=true);
+            }
+
+            if (Dovetail_Top) {
+                translate([0,0,sh_outer_z])
+                if (Dovetail_Back) {
+                    shell_dovetail(extra=Dovetail_Size, true, notch = 1);
+                } else {
+                    shell_dovetail(0, true, notch = 1);
+                }
+            }
+            
+            if (Label_Thickness > 0 ) {
+                translate([sh_outer_x/2,0,sho_total_height+Shell_Thickness])
+                rotate([90,0,0])
+                labelholder();
+            }                
+            if( Bottom_Angled && Constant_Depth &&  Bag_Ramp > 0 ) {
+                backfill();
+            }
         }
-    }
-    if (Dovetail_Back) {
-        translate([0,sh_outer_y,sh_outer_z])
-        rotate([270,0,0])
-        // back is always longer, so it matches top no matter what
-        shell_dovetail(extra=Dovetail_Size, angled=true);
-    }
-    if (Label_Thickness > 0 ) {
-        translate([sh_outer_x/2,0,sho_total_height+Shell_Thickness])
-        rotate([90,0,0])
-        labelholder();
-    }
+
+        if( Bottom_Angled && Bag_Ramp > 0 ) {
+            bottom_cutoff();
+        }
+
+    };
+
 }
 
 module print_shell_assembled() {
@@ -551,7 +616,7 @@ module print_backplate() {
     }
 }
 
-previewDebug = false;
+previewDebug = true;
 
 if ($preview && previewDebug ) {
     translate(v = [sh_outer_x + 10, 0 , 0])
